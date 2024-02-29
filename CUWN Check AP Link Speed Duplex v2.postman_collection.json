@@ -1,0 +1,1526 @@
+{
+	"info": {
+		"_postman_id": "cdf687cf-caaf-4c1f-a545-60fcbfd8dd73",
+		"name": "CUWN Check AP Link Speed Duplex v2",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2630840"
+	},
+	"item": [
+		{
+			"name": "Authenticate Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);",
+							"",
+							"// change to false to see all tests get executed",
+							"const skipTest = false;",
+							"",
+							"if (!skipTest) { ",
+							"    pm.test(\"Status code is 200\", function () {",
+							"        pm.response.to.have.status(200);",
+							"    });",
+							"}",
+							"",
+							"if (pm.response.code === 200) {",
+							"    // extract token",
+							"    var responseJson = pm.response.json();",
+							"    postman.setEnvironmentVariable(\"token\", responseJson.Token);",
+							"}",
+							"",
+							"if (pm.response.code === 202) {",
+							"    // loop to self since process is still pending",
+							"    console.info(\"Loop to self since process is still pending\");",
+							"    postman.setNextRequest(pm.info.requestName);",
+							"}",
+							"",
+							"if (pm.response.code === 401) {",
+							"    // go to DONE since it failed",
+							"    console.info(\"Going to DONE since it failed\")",
+							"    postman.setNextRequest(\"DONE\");",
+							"}",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "{{username}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{password}}",
+							"type": "string"
+						},
+						{
+							"key": "saveHelperData",
+							"value": true,
+							"type": "boolean"
+						},
+						{
+							"key": "showPassword",
+							"value": false,
+							"type": "boolean"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46R3JhcGV2aW5lMQ=="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{dnac}}/api/system/v1/auth/token",
+					"protocol": "https",
+					"host": [
+						"{{dnac}}"
+					],
+					"path": [
+						"api",
+						"system",
+						"v1",
+						"auth",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fetch WLC List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// change to false to see all tests get executed\r",
+							"const skipTest = false;\r",
+							"\r",
+							"if (!skipTest) { \r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 200) { \r",
+							"    var responseJson = pm.response.json();\r",
+							"    var fetch_WLCdeviceIds = [];\r",
+							"    postman.setEnvironmentVariable(\"fetch_WLCs\", JSON.stringify(responseJson.response));\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 202) {\r",
+							"    // loop to self since process is still pending\r",
+							"    console.info(\"Loop to self since process is still pending\");\r",
+							"    postman.setNextRequest(pm.info.requestName);\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 401) {\r",
+							"    // go to DONE since it failed\r",
+							"    console.info(\"Going to DONE since it failed\")\r",
+							"    postman.setNextRequest(\"DONE\");\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://{{dnac}}/dna/intent/api/v1/network-device?family=Wireless Controller",
+					"protocol": "https",
+					"host": [
+						"{{dnac}}"
+					],
+					"path": [
+						"dna",
+						"intent",
+						"api",
+						"v1",
+						"network-device"
+					],
+					"query": [
+						{
+							"key": "family",
+							"value": "Wireless Controller"
+						}
+					]
+				},
+				"description": "This request uses the \"token\" variable generated from the POST request to get first 14 network-devices"
+			},
+			"response": []
+		},
+		{
+			"name": "Loop1 START",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// safety-net in case loop does not work correctly\r",
+							"postman.setNextRequest(\"DONE\");\r",
+							"\r",
+							"// to avoid errors, create & initialize environ variable if not exist\r",
+							"\r",
+							"// if there is not a fetch_WLCs list, create a blank one\r",
+							"if ( !pm.environment.has(\"fetch_WLCs\") ) {\r",
+							"    pm.environment.set(\"fetch_WLCs\", JSON.stringify([]));\r",
+							"}\r",
+							"let fetch_WLCs = JSON.parse(pm.environment.get(\"fetch_WLCs\"));\r",
+							"\r",
+							"// if there is not a process_looping, create a false one\r",
+							"if ( !pm.environment.has(\"process_looping\") ) {\r",
+							"    pm.environment.set(\"process_looping\", JSON.stringify(false));\r",
+							"}\r",
+							"let process_looping = JSON.parse(pm.environment.get(\"process_looping\"));\r",
+							"\r",
+							"// if there is not a process_WLCs list, then create a blank one\r",
+							"if ( !pm.environment.has(\"process_WLCs\") ) {\r",
+							"    pm.environment.set(\"process_WLCs\", JSON.stringify([]));\r",
+							"}\r",
+							"// now load remaining process_WLC list\r",
+							"let process_WLCs = JSON.parse(pm.environment.get(\"process_WLCs\"));\r",
+							"\r",
+							"// if there is no process_WLC_current, then just create a blank one\r",
+							"if ( !pm.environment.has(\"process_WLC_current\") ) {\r",
+							"    pm.environment.set(\"process_WLC_current\", JSON.stringify(new Object()));\r",
+							"}\r",
+							"// now load the process_WLC_current\r",
+							"let process_WLC_current = JSON.parse(pm.environment.get(\"process_WLC_current\"));\r",
+							"\r",
+							"// if there is no process_WLC_deviceIds, then just create a blank one\r",
+							"if ( !pm.environment.has(\"process_WLC_deviceIds\") ) {\r",
+							"    pm.environment.set(\"process_WLC_deviceIds\", JSON.stringify([]));\r",
+							"}\r",
+							"// now load the process_WLC_deviceIds\r",
+							"let process_WLC_deviceIds = JSON.parse(pm.environment.get(\"process_WLC_deviceIds\"));\r",
+							"\r",
+							"// if there is no process_WLC_current_commands, then just create a blank one\r",
+							"if ( !pm.environment.has(\"process_WLC_current_commands\") ) {\r",
+							"    pm.environment.set(\"process_WLC_current_commands\", JSON.stringify([]));\r",
+							"}\r",
+							"// now load the process_WLC_current_commands\r",
+							"let process_WLC_current_commands = JSON.parse(pm.environment.get(\"process_WLC_current_commands\"));\r",
+							"\r",
+							"// if there is no process_AP_table, then just create a blank one\r",
+							"if ( !pm.environment.has(\"process_AP_table\") ) {\r",
+							"    pm.environment.set(\"process_AP_table\", JSON.stringify([]));\r",
+							"}\r",
+							"// now load the process_AP_table\r",
+							"let process_AP_table = JSON.parse(pm.environment.get(\"process_AP_table\"));\r",
+							"\r",
+							"\r",
+							"// create a flag to know we are looping .. and start the list from scratch\r",
+							"// this gets removed in Tests when DONE\r",
+							"if ( !process_looping ) {\r",
+							"    // starting a fresh new loop\r",
+							"    process_looping = true;\r",
+							"    // if starting up the loop, load process_WLCs with the entire list of fetch_WLCs\r",
+							"    process_WLCs = fetch_WLCs;\r",
+							"    // for starting the loop, make process_WLC_current empty here, so it will be shifted into a few steps down\r",
+							"    process_WLC_current = \"\";\r",
+							"    process_WLC_deviceIds = [];\r",
+							"    process_AP_table = [];\r",
+							"}\r",
+							"\r",
+							"if ( process_looping && process_WLCs.length <= 0 ) {\r",
+							"    // we are done looping so clear the related looping variables\r",
+							"    process_looping = false;\r",
+							"    process_WLC_current = \"\";\r",
+							"    process_WLC_deviceIds = [];\r",
+							"    process_AP_table = [];\r",
+							"    console.log(\"goto Loop1 DONE\");\r",
+							"    postman.setNextRequest(\"Loop1 DONE\");\r",
+							"}\r",
+							"\r",
+							"if ( process_looping && process_WLCs.length > 0 ) {\r",
+							"    // if there are more WLC-s to process, then load the next one and run the loop\r",
+							"    console.log(\" ... next WLC of \" + process_WLCs.length);\r",
+							"    process_WLC_current = process_WLCs.shift();\r",
+							"    process_WLC_deviceIds = [process_WLC_current.id];\r",
+							"}\r",
+							"\r",
+							"console.log(\"Queuing deviceId \" + process_WLC_current.id + \" platformId \" + process_WLC_current.platformId + \" for hostname \" + process_WLC_current.hostname + \" at \" + process_WLC_current.snmpLocation);\r",
+							"\r",
+							"if ( process_WLC_current.platformId.includes(\"9800\") ) {\r",
+							"    process_WLC_current_commands = [\"show ap cdp neighbors\", \"show ap ethernet statistics\"];\r",
+							"    console.log(\"continue 9800\");\r",
+							"    postman.setNextRequest(null);\r",
+							"} else if (process_WLC_current.platformId.includes(\"AIR-CT\") ) {\r",
+							"    process_WLC_current_commands = [\"show ap cdp neighbors all\", \"show ap stats ethernet summary\"];\r",
+							"    console.log(\"continue AIR-CT\");\r",
+							"    postman.setNextRequest(null);\r",
+							"}\r",
+							"\r",
+							"console.log(process_WLC_current_commands);\r",
+							"\r",
+							"// now remember where we are in the list\r",
+							"if (process_looping) {\r",
+							"    pm.environment.set(\"process_looping\", JSON.stringify(process_looping));\r",
+							"} else {\r",
+							"    pm.environment.unset(\"process_looping\");\r",
+							"}\r",
+							"\r",
+							"if ( process_WLCs.length > 0 ) {\r",
+							"    pm.environment.set(\"process_WLCs\", JSON.stringify(process_WLCs));\r",
+							"} else {\r",
+							"    pm.environment.unset(\"process_WLCs\");\r",
+							"}\r",
+							"\r",
+							"if ( process_WLC_deviceIds.length > 0) {\r",
+							"    pm.environment.set(\"process_WLC_deviceIds\", JSON.stringify(process_WLC_deviceIds));\r",
+							"} else {\r",
+							"    pm.environment.unset(\"process_WLC_deviceIds\");\r",
+							"}\r",
+							"\r",
+							"if ( process_WLC_current ) {\r",
+							"    pm.environment.set(\"process_WLC_current\", JSON.stringify(process_WLC_current));\r",
+							"} else {\r",
+							"    pm.environment.unset(\"process_WLC_current\");\r",
+							"}\r",
+							"\r",
+							"if ( process_WLC_current_commands.length > 0 ) {\r",
+							"    pm.environment.set(\"process_WLC_current_commands\", JSON.stringify(process_WLC_current_commands));\r",
+							"} else {\r",
+							"    pm.environment.unset(\"process_WLC_current_commands\");\r",
+							"}\r",
+							"\r",
+							"if ( process_AP_table.length > 0 ) {\r",
+							"    pm.environment.set(\"process_AP_table\", JSON.stringify(process_AP_table));\r",
+							"} else {\r",
+							"    pm.environment.unset(\"process_AP_table\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// change to false to see all tests get executed\r",
+							"const skipTest = false;\r",
+							"\r",
+							"if (!skipTest) { \r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 200) {\r",
+							"    //\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 202) {\r",
+							"    // loop to self since process is still pending\r",
+							"    console.info(\"Loop to self since process is still pending\");\r",
+							"    postman.setNextRequest(pm.info.requestName);\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 401) {\r",
+							"    // go to DONE since it failed\r",
+							"    console.info(\"Going to DONE since it failed\");\r",
+							"    postman.setNextRequest(\"DONE\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://postman-echo.com/get?username={{username}}",
+					"protocol": "http",
+					"host": [
+						"postman-echo",
+						"com"
+					],
+					"path": [
+						"get"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "{{username}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST Command Runner show ap summary",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// change to false to see all tests get executed\r",
+							"const skipTest = false;\r",
+							"\r",
+							"if (!skipTest) { \r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 200 || pm.response.code === 202) {\r",
+							"    var responseJson = pm.response.json();\r",
+							"    if (responseJson.response.url) {\r",
+							"        console.log(\"current_url \" + responseJson.response.url);\r",
+							"        pm.environment.set(\"current_task_url\", responseJson.response.url);\r",
+							"    } else {\r",
+							"        pm.environment.set(\"current_task_url\", \"\");\r",
+							"    }\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 401) {\r",
+							"    // go to DONE since it failed\r",
+							"    console.info(\"Going to DONE since it failed\")\r",
+							"    postman.setNextRequest(\"DONE\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"commands\": [\"show ap summary\"],\r\n    \"deviceUuids\":  {{process_WLC_deviceIds}} ,\r\n    \"timeout\": 0\r\n}"
+				},
+				"url": {
+					"raw": "https://{{dnac}}/dna/intent/api/v1/network-device-poller/cli/read-request",
+					"protocol": "https",
+					"host": [
+						"{{dnac}}"
+					],
+					"path": [
+						"dna",
+						"intent",
+						"api",
+						"v1",
+						"network-device-poller",
+						"cli",
+						"read-request"
+					]
+				},
+				"description": "This request uses the \"token\" variable generated from the POST request to get first 14 network-devices"
+			},
+			"response": []
+		},
+		{
+			"name": "GET current taskID to fileId",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// change to false to see all tests get executed\r",
+							"const skipTest = false;\r",
+							"\r",
+							"if (!skipTest) { \r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 200) {\r",
+							"    var data = pm.response.json();\r",
+							"    if (data.response.progress && data.response.progress.substring(0,1) == \"{\" ) {\r",
+							"        progress = JSON.parse(data.response.progress);\r",
+							"        if (progress.fileId) {\r",
+							"            console.log(\"current_fileId \" + progress.fileId);\r",
+							"            pm.environment.set(\"current_fileId\", progress.fileId);\r",
+							"        } else {\r",
+							"            console.log(\" ... waiting for fileId\");\r",
+							"            // loop to self\r",
+							"            postman.setNextRequest(pm.info.requestName);\r",
+							"        }\r",
+							"    } else {\r",
+							"        console.log(\" ... waiting for fileId\");\r",
+							"    }\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 202) {\r",
+							"    // loop to self since process is still pending\r",
+							"    console.info(\"Loop to self since process is still pending\");\r",
+							"    postman.setNextRequest(pm.info.requestName);\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 401) {\r",
+							"    // go to DONE since it failed\r",
+							"    console.info(\"Going to DONE since it failed\")\r",
+							"    postman.setNextRequest(\"DONE\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://{{dnac}}{{current_task_url}}",
+					"protocol": "https",
+					"host": [
+						"{{dnac}}{{current_task_url}}"
+					]
+				},
+				"description": "This request uses the \"token\" variable generated from the POST request to get first 14 network-devices"
+			},
+			"response": []
+		},
+		{
+			"name": "GET current fileId",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// change to false to see all tests get executed\r",
+							"const skipTest = false;\r",
+							"\r",
+							"if (!skipTest) { \r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 200) {\r",
+							"    var data = pm.response.json();\r",
+							"    if (data) console.info(data);\r",
+							"    pm.environment.set(\"current_fileId_data\", JSON.stringify(data));    \r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 202) {\r",
+							"    // loop to self since process is still pending\r",
+							"    console.info(\"Loop to self since process is still pending\");\r",
+							"    postman.setNextRequest(pm.info.requestName);\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 401) {\r",
+							"    // go to DONE since it failed\r",
+							"    console.info(\"Going to DONE since it failed\")\r",
+							"    postman.setNextRequest(\"DONE\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://{{dnac}}/dna/intent/api/v1/file/{{current_fileId}}",
+					"protocol": "https",
+					"host": [
+						"{{dnac}}"
+					],
+					"path": [
+						"dna",
+						"intent",
+						"api",
+						"v1",
+						"file",
+						"{{current_fileId}}"
+					]
+				},
+				"description": "This request uses the \"token\" variable generated from the POST request to get first 14 network-devices"
+			},
+			"response": []
+		},
+		{
+			"name": "PROCESS show ap per Device",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"if ( !pm.environment.has(\"current_fileId_data\") ) {\r",
+							"    pm.environment.set(\"current_fileId_data\", JSON.stringify([]));\r",
+							"}\r",
+							"let current_fileId_data = JSON.parse(pm.environment.get(\"current_fileId_data\"));\r",
+							"\r",
+							"// if there is no process_AP_table, then just create a blank one\r",
+							"if ( !pm.environment.has(\"process_AP_table\") ) {\r",
+							"    pm.environment.set(\"process_AP_table\", JSON.stringify([]));\r",
+							"}\r",
+							"// now load the process_AP_table\r",
+							"let process_AP_table = JSON.parse(pm.environment.get(\"process_AP_table\"));\r",
+							"\r",
+							"ap_entry = {};\r",
+							"ap_cnt_suspect = 0;\r",
+							"\r",
+							"// looping through each device object\r",
+							"current_fileId_data.forEach( device => {\r",
+							"\r",
+							"    const chk_blocks = [\"SUCCESS\" , \"FAILURE\"];\r",
+							"    chk_blocks.forEach( chk_block => {\r",
+							"        // checking if the device has a property\r",
+							"        if(device.hasOwnProperty(\"commandResponses\") & device.commandResponses.hasOwnProperty(chk_block)) {\r",
+							"            const keys = Object.keys(device.commandResponses[chk_block]);\r",
+							"            keys.forEach( key => {\r",
+							"                var lines = device.commandResponses[chk_block][key].split(\"\\n\");\r",
+							"                let ap_name = \"\";\r",
+							"\r",
+							"                lines.forEach( line => { \r",
+							"\r",
+							"                    // 9800 IOS-XE \"show ap summary\"\r",
+							"                    var re_match = new RegExp(/(\\S+)\\s+(\\d)\\s+(\\S+)\\s+([A-Fa-f0-9]{1,4}\\.[A-Fa-f0-9]{1,4}\\.[A-Fa-f0-9]{1,4})\\s+([A-Fa-f0-9]{1,4}\\.[A-Fa-f0-9]{1,4}\\.[A-Fa-f0-9]{1,4})\\s+/);\r",
+							"                    this_match = line.match(re_match);\r",
+							"                    if (this_match) { \r",
+							"                        // ap_name is match group 1\r",
+							"                        ap_name = this_match[1];\r",
+							"                        find_ap = process_AP_table.findIndex(ap_entry => ap_entry.ap_name === ap_name);\r",
+							"                        if (find_ap >= 0) {\r",
+							"                            ap_entry = process_AP_table[find_ap];\r",
+							"                        } else {\r",
+							"                            ap_entry = {};\r",
+							"                        }\r",
+							"                        ap_entry.ap_name = ap_name;\r",
+							"                        if (find_ap >= 0) {\r",
+							"                            process_AP_table[find_ap] = ap_entry;\r",
+							"                        } else {\r",
+							"                            process_AP_table.push(ap_entry);\r",
+							"                        }\r",
+							"                    }\r",
+							"\r",
+							"                    // 9800 IOS-XE \"show ap cdp neighbor\" ... cdp neighbor per AP\r",
+							"                    var re_match = /(\\S+)\\s+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\s+(\\S+)\\s+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\s+(\\S+)/\r",
+							"                    var this_match = new RegExp(re_match);\r",
+							"                    this_match = line.match(re_match);\r",
+							"                    if ( this_match ) {\r",
+							"                        ap_name = this_match[1];\r",
+							"                        find_ap = process_AP_table.findIndex(ap_entry => ap_entry.ap_name === ap_name);\r",
+							"                        if (find_ap >= 0) {\r",
+							"                            ap_entry = process_AP_table[find_ap];\r",
+							"                        } else {\r",
+							"                            ap_entry = {};\r",
+							"                        }\r",
+							"                        ap_entry.ap_name = ap_name;\r",
+							"                        ap_entry.ap_cdp_switch = this_match[3];\r",
+							"                        ap_entry.ap_cdp_switchport = this_match[5];\r",
+							"                        found = process_AP_table.findIndex(ap_entry => ap_entry.ap_name === ap_name);\r",
+							"                        if (find_ap >= 0) {\r",
+							"                            process_AP_table[find_ap] = ap_entry;\r",
+							"                        } else {\r",
+							"                            process_AP_table.push(ap_entry);\r",
+							"                        }\r",
+							"                    }\r",
+							"\r",
+							"                    // 9800 IOS-XE \"show ap ethernet statistics\" ... extract AP name along the way\r",
+							"                    var re_match = new RegExp(/AP\\s+Name\\s+:\\s+(\\S+)/);\r",
+							"                    this_match = line.match(re_match);\r",
+							"                    if (this_match) { \r",
+							"                        // ap_name is match group 1\r",
+							"                        ap_name = this_match[1];\r",
+							"                        find_ap = process_AP_table.findIndex(ap_entry => ap_entry.ap_name === ap_name);\r",
+							"                        if (find_ap >= 0) {\r",
+							"                            ap_entry = process_AP_table[find_ap];\r",
+							"                        } else {\r",
+							"                            ap_entry = {};\r",
+							"                        }\r",
+							"                        ap_entry.ap_name = ap_name;\r",
+							"                        if (find_ap >= 0) {\r",
+							"                            process_AP_table[find_ap] = ap_entry;\r",
+							"                        } else {\r",
+							"                            process_AP_table.push(ap_entry);\r",
+							"                        }\r",
+							"                    }\r",
+							"                    // 9800 IOS-XE \"show ap ethernet statistics\" ... find Gig0 line\r",
+							"                    var re_match = new RegExp(/(GigabitEthernet0)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+/i);\r",
+							"                    this_match = line.match(re_match);\r",
+							"                    if ( this_match ) { \r",
+							"                        // call out line without 1000 Mbps Full\r",
+							"                        find_ap = process_AP_table.findIndex(ap_entry => ap_entry.ap_name === ap_name);\r",
+							"                        if (find_ap >= 0) {\r",
+							"                            ap_entry = process_AP_table[find_ap];\r",
+							"                        } else {\r",
+							"                            ap_entry = {};\r",
+							"                        }\r",
+							"                        ap_entry.ap_name = ap_name;\r",
+							"                        ap_entry.ap_speed = this_match[3];\r",
+							"                        ap_entry.ap_duplex = this_match[5];\r",
+							"                        if (find_ap >= 0) {\r",
+							"                            process_AP_table[find_ap] = ap_entry;\r",
+							"                        } else {\r",
+							"                            process_AP_table.push(ap_entry);\r",
+							"                        }\r",
+							"                    }\r",
+							"\r",
+							"\r",
+							"                });\r",
+							"            });\r",
+							"        }\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"process_AP_table.forEach( ap_entry => {\r",
+							"    if ( ( ap_entry.hasOwnProperty('ap_speed') && ap_entry.hasOwnProperty('ap_speed') )\r",
+							"          && ( ap_entry.ap_speed !=\"1000\" || ap_entry.ap_duplex.toLowerCase()!=\"full\" ) ) { \r",
+							"        console.log(ap_entry.ap_name + \" is \" + ap_entry.ap_speed + \" \" + ap_entry.ap_duplex + \" on \" + ap_entry.ap_cdp_switch + \" \" + ap_entry.ap_cdp_switchport);\r",
+							"        ap_cnt_suspect++;\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"console.warn(\"found \" + ap_cnt_suspect + \" of \" + process_AP_table.length + \" AP suspect speed/duplex\");\r",
+							"\r",
+							"if ( process_AP_table.length > 0 ) {\r",
+							"    pm.environment.set(\"process_AP_table\", JSON.stringify(process_AP_table));\r",
+							"} else {\r",
+							"    pm.environment.unset(\"process_AP_table\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// change to false to see all tests get executed\r",
+							"const skipTest = false;\r",
+							"\r",
+							"if (!skipTest) { \r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 200) {\r",
+							"    //\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 202) {\r",
+							"    // loop to self since process is still pending\r",
+							"    console.info(\"Loop to self since process is still pending\");\r",
+							"    postman.setNextRequest(pm.info.requestName);\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 401) {\r",
+							"    // go to DONE since it failed\r",
+							"    console.info(\"Going to DONE since it failed\")\r",
+							"    postman.setNextRequest(\"DONE\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://postman-echo.com/get?username={{username}}",
+					"protocol": "http",
+					"host": [
+						"postman-echo",
+						"com"
+					],
+					"path": [
+						"get"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "{{username}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Loop1 UPDATE",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// to avoid errors, create & initialize environ variable if not exist\r",
+							"\r",
+							"// if there is no process_WLC_current, then just create a blank one\r",
+							"if ( !pm.environment.has(\"process_WLC_current\") ) {\r",
+							"    pm.environment.set(\"process_WLC_current\", JSON.stringify(new Object()));\r",
+							"}\r",
+							"// now load the process_WLC_current\r",
+							"let process_WLC_current = JSON.parse(pm.environment.get(\"process_WLC_current\"));\r",
+							"\r",
+							"// if there is no process_WLC_current_commands, then just create a blank one\r",
+							"if ( !pm.environment.has(\"process_WLC_current_commands\") ) {\r",
+							"    pm.environment.set(\"process_WLC_current_commands\", JSON.stringify([]));\r",
+							"}\r",
+							"// now load the process_WLC_current_commands\r",
+							"let process_WLC_current_commands = JSON.parse(pm.environment.get(\"process_WLC_current_commands\"));\r",
+							"\r",
+							"// if there is no process_AP_table, then just create a blank one\r",
+							"if ( !pm.environment.has(\"process_AP_table\") ) {\r",
+							"    pm.environment.set(\"process_AP_table\", JSON.stringify([]));\r",
+							"}\r",
+							"// now load the process_AP_table\r",
+							"let process_AP_table = JSON.parse(pm.environment.get(\"process_AP_table\"));\r",
+							"\r",
+							"\r",
+							"// IOS-XE was lacking \"show ap ethernet statistics\" as a summary prior to 17.6, thus if prior to that one has to step across each AP to fetch this statistic\r",
+							"this_WLC_softwareVersion = process_WLC_current.softwareVersion.split(\".\");\r",
+							"if ( process_WLC_current.platformId.includes(\"9800\") && Number(this_WLC_softwareVersion[0]) >= 17 && Number(this_WLC_softwareVersion[1]) >= 6 ) {\r",
+							"    console.log(\"continue 9800 post 17.6\");\r",
+							"} else if ( process_WLC_current.platformId.includes(\"9800\") ) {\r",
+							"    process_AP_table.forEach( ap_device => {\r",
+							"        process_WLC_current_commands.push(\"show ap name \" + ap_device.ap_name + \" ethernet statistics\");\r",
+							"    });\r",
+							"    console.log(\"continue 9800 pre 17.6\");\r",
+							"}\r",
+							"\r",
+							"console.log(process_WLC_current_commands);\r",
+							"\r",
+							"if ( process_WLC_current_commands.length > 0 ) {\r",
+							"    pm.environment.set(\"process_WLC_current_commands\", JSON.stringify(process_WLC_current_commands));\r",
+							"} else {\r",
+							"    pm.environment.unset(\"process_WLC_current_commands\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// change to false to see all tests get executed\r",
+							"const skipTest = false;\r",
+							"\r",
+							"if (!skipTest) { \r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 200) {\r",
+							"    //\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 202) {\r",
+							"    // loop to self since process is still pending\r",
+							"    console.info(\"Loop to self since process is still pending\");\r",
+							"    postman.setNextRequest(pm.info.requestName);\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 401) {\r",
+							"    // go to DONE since it failed\r",
+							"    console.info(\"Going to DONE since it failed\");\r",
+							"    postman.setNextRequest(\"DONE\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://postman-echo.com/get?username={{username}}",
+					"protocol": "http",
+					"host": [
+						"postman-echo",
+						"com"
+					],
+					"path": [
+						"get"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "{{username}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST Command Runner process_WLC_current_commands",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// change to false to see all tests get executed\r",
+							"const skipTest = false;\r",
+							"\r",
+							"if (!skipTest) { \r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 200 || pm.response.code === 202) {\r",
+							"    var responseJson = pm.response.json();\r",
+							"    if (responseJson.response.url) {\r",
+							"        console.log(\"current_url \" + responseJson.response.url);\r",
+							"        pm.environment.set(\"current_task_url\", responseJson.response.url);\r",
+							"    } else {\r",
+							"        pm.environment.set(\"current_task_url\", \"\");\r",
+							"    }\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 401) {\r",
+							"    // go to DONE since it failed\r",
+							"    console.info(\"Going to DONE since it failed\")\r",
+							"    postman.setNextRequest(\"DONE\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"commands\": {{process_WLC_current_commands}},\r\n    \"deviceUuids\":  {{process_WLC_deviceIds}} ,\r\n    \"timeout\": 0\r\n}"
+				},
+				"url": {
+					"raw": "https://{{dnac}}/dna/intent/api/v1/network-device-poller/cli/read-request",
+					"protocol": "https",
+					"host": [
+						"{{dnac}}"
+					],
+					"path": [
+						"dna",
+						"intent",
+						"api",
+						"v1",
+						"network-device-poller",
+						"cli",
+						"read-request"
+					]
+				},
+				"description": "This request uses the \"token\" variable generated from the POST request to get first 14 network-devices"
+			},
+			"response": []
+		},
+		{
+			"name": "GET current taskID to fileId",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// change to false to see all tests get executed\r",
+							"const skipTest = false;\r",
+							"\r",
+							"if (!skipTest) { \r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 200) {\r",
+							"    var data = pm.response.json();\r",
+							"    if (data.response.progress && data.response.progress.substring(0,1) == \"{\" ) {\r",
+							"        progress = JSON.parse(data.response.progress);\r",
+							"        if (progress.fileId) {\r",
+							"            console.log(\"current_fileId \" + progress.fileId);\r",
+							"            pm.environment.set(\"current_fileId\", progress.fileId);\r",
+							"        } else {\r",
+							"            console.log(\" ... waiting for fileId\");\r",
+							"            // loop to self\r",
+							"            postman.setNextRequest(pm.info.requestName);\r",
+							"        }\r",
+							"    } else {\r",
+							"        console.log(\" ... waiting for fileId\");\r",
+							"    }\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 202) {\r",
+							"    // loop to self since process is still pending\r",
+							"    console.info(\"Loop to self since process is still pending\");\r",
+							"    postman.setNextRequest(pm.info.requestName);\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 401) {\r",
+							"    // go to DONE since it failed\r",
+							"    console.info(\"Going to DONE since it failed\")\r",
+							"    postman.setNextRequest(\"DONE\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://{{dnac}}{{current_task_url}}",
+					"protocol": "https",
+					"host": [
+						"{{dnac}}{{current_task_url}}"
+					]
+				},
+				"description": "This request uses the \"token\" variable generated from the POST request to get first 14 network-devices"
+			},
+			"response": []
+		},
+		{
+			"name": "GET current fileId",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// change to false to see all tests get executed\r",
+							"const skipTest = false;\r",
+							"\r",
+							"if (!skipTest) { \r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 200) {\r",
+							"    var data = pm.response.json();\r",
+							"    if (data) console.info(data);\r",
+							"    pm.environment.set(\"current_fileId_data\", JSON.stringify(data));    \r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 202) {\r",
+							"    // loop to self since process is still pending\r",
+							"    console.info(\"Loop to self since process is still pending\");\r",
+							"    postman.setNextRequest(pm.info.requestName);\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 401) {\r",
+							"    // go to DONE since it failed\r",
+							"    console.info(\"Going to DONE since it failed\")\r",
+							"    postman.setNextRequest(\"DONE\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://{{dnac}}/dna/intent/api/v1/file/{{current_fileId}}",
+					"protocol": "https",
+					"host": [
+						"{{dnac}}"
+					],
+					"path": [
+						"dna",
+						"intent",
+						"api",
+						"v1",
+						"file",
+						"{{current_fileId}}"
+					]
+				},
+				"description": "This request uses the \"token\" variable generated from the POST request to get first 14 network-devices"
+			},
+			"response": []
+		},
+		{
+			"name": "Loop1 NEXT",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"if ( pm.environment.has(\"process_looping\") ) {\r",
+							"    postman.setNextRequest(\"Loop1 START\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// change to false to see all tests get executed\r",
+							"const skipTest = false;\r",
+							"\r",
+							"if (!skipTest) { \r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 200) {\r",
+							"    //\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 202) {\r",
+							"    // loop to self since process is still pending\r",
+							"    console.info(\"Loop to self since process is still pending\");\r",
+							"    postman.setNextRequest(pm.info.requestName);\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 401) {\r",
+							"    // go to DONE since it failed\r",
+							"    console.info(\"Going to DONE since it failed\");\r",
+							"    postman.setNextRequest(\"DONE\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://postman-echo.com/get?username={{username}}",
+					"protocol": "http",
+					"host": [
+						"postman-echo",
+						"com"
+					],
+					"path": [
+						"get"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "{{username}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Loop1 DONE",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"if ( pm.environment.has(\"process_looping\") ) {\r",
+							"    pm.environment.unset(\"process_looping\");\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// change to false to see all tests get executed\r",
+							"const skipTest = false;\r",
+							"\r",
+							"if (!skipTest) { \r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 200) {\r",
+							"    //\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 202) {\r",
+							"    // loop to self since process is still pending\r",
+							"    console.info(\"Loop to self since process is still pending\");\r",
+							"    postman.setNextRequest(pm.info.requestName);\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 401) {\r",
+							"    // go to DONE since it failed\r",
+							"    console.info(\"Going to DONE since it failed\");\r",
+							"    postman.setNextRequest(\"DONE\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://postman-echo.com/get?username={{username}}",
+					"protocol": "http",
+					"host": [
+						"postman-echo",
+						"com"
+					],
+					"path": [
+						"get"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "{{username}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DONE",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.info(pm.info.requestName + \" :: \" + pm.info.eventName);\r",
+							"\r",
+							"// change to false to see all tests get executed\r",
+							"const skipTest = false;\r",
+							"\r",
+							"if (!skipTest) { \r",
+							"    pm.test(\"Status code is 200\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 200) {\r",
+							"    //\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 202) {\r",
+							"    // loop to self since process is still pending\r",
+							"    console.info(\"Loop to self since process is still pending\");\r",
+							"    postman.setNextRequest(pm.info.requestName);\r",
+							"}\r",
+							"\r",
+							"if (!skipTest && pm.response.code === 401) {\r",
+							"    // go to DONE since it failed\r",
+							"    console.info(\"Going to DONE since it failed\")\r",
+							"    postman.setNextRequest(\"DONE\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://postman-echo.com/get?username={{username}}",
+					"protocol": "http",
+					"host": [
+						"postman-echo",
+						"com"
+					],
+					"path": [
+						"get"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "{{username}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
